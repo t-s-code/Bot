@@ -34,6 +34,22 @@ class ConfigChannel:
 
         raise RuntimeError("No valid config found in config channel.")
 
+    async def handle_possible_config_update(self, message):
+        """
+        Signal method called when any Discord message event occurs.
+
+        If the message is in the config channel, attempt to load
+        the latest config snapshot.
+        """
+        if message.channel.id != self._config_channel_id:
+            return False
+
+        if message.author.bot:
+            return False
+
+        await self.load_latest_config()
+        return True
+
     async def load_latest_config(self):
         """
         Attempts to load config from the most recent moderator message.

@@ -54,10 +54,10 @@ class Bot(discord.Client):
     async def setup_hook(self):
         self.dry_run = DryRun(is_dry_run=self._is_dry_run)
 
-        disord_client = self
+        discord_client = self
         
         self.config_channel = ConfigChannel(
-            discord_client=disord_client,
+            discord_client=discord_client,
             config_channel_id=self._config_channel_id,
         )
 

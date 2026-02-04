@@ -20,7 +20,7 @@ from channels.log_channel import LogChannel
 
 from jobs.member_activity_job import MemberActivityJob
 from jobs.channel_pruning_job import ChannelPruningJob
-from jobs.channel_scan_job import ChannelScanJob
+from jobs.channel_scanning_job import ChannelScanningJob
 
 
 class Bot(discord.Client):
@@ -41,7 +41,7 @@ class Bot(discord.Client):
 
         self.member_activity_job = None
         self.channel_pruning_job = None
-        self.channel_scan_job= None
+        self.channel_scanning_job = None
         
         self.message_processor = None
 
@@ -97,7 +97,7 @@ class Bot(discord.Client):
             database_channel=self.database_channel,
         )
         
-        self.channel_scan_job = ChannelScanJob(
+        self.channel_scanning_job = ChannelScanningJob(
             discord_client=self,
             processing_lock=self._processing_lock,
             message_processor=self.message_processor,
@@ -124,9 +124,10 @@ class Bot(discord.Client):
             await asyncio.sleep(300)
 
             async with self._processing_lock:
+                await self.channel_scanning_job.run_scanning_sweep()
                 await self.member_activity_job.run_inactivity_sweep()
                 await self.channel_pruning_job.run_pruning_sweep()
-
+                
     async def request_hot_reload(self):
         """
         Reload config safely when bot is idle.

@@ -112,7 +112,7 @@ class Bot(discord.Client):
         if message.author.bot:
             return
 
-        await self.channel_scan_job.schedule_scan(
+        await self.channel_scanning_job.schedule_scan(
             channel_id=message.channel.id
         )
 

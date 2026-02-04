@@ -79,17 +79,17 @@ class Bot(discord.Client):
 
         self.member_activity_job = MemberActivityJob(
             discord_client=self,
+            dry_run=self.dry_run,
             config=config,
             log_channel=self.log_channel,
-            dry_run=self.dry_run,
-            database_channel=self.database_channe,
+            database_channel=self.database_channel,
         )
 
         self.channel_pruning_job = ChannelPruningJob(
             discord_client=self,
+            dry_run=self.dry_run,
             config=config,
             log_channel=self.log_channel,
-            dry_run=self.dry_run,
             database_channel=self.database_channel,
         )
 
@@ -125,7 +125,7 @@ def main():
     """
     Application bootstrap.
     """
-    # TODO read both of thrse from command line arge
+    # TODO read both of these from command line args
     is_dry_run = None
     config_channel_id = None
     

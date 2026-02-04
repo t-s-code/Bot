@@ -71,8 +71,7 @@ bot/
 
         channel_pruning_job.py # Deletes messages from channels that are older than we defined in #bot-config.
 
-        channel_scanning_job # Scans messages from channels and updates database. Ensures we don't lose any member activity.
-
+        channel_scanning_job.py # Scans messages from channels and updates database. Ensures we don't lose any member activity if Discord events are missed.
 ```
 
 ## Data Models

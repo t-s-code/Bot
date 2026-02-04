@@ -33,7 +33,7 @@ Fun fact &mdash; this bot was created with the help of ChatGPT 🙏 We pair prog
 ## Project (File) Hierarchy
 Below is a birds-eye view of the files which bring our bot to life.
 
-```
+```yaml
 
 bot/
 

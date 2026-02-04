@@ -85,7 +85,7 @@ These records define the bot’s behavior and moderation policies.
 #### CHANNEL_PRUNING_POLICY
 Defines when messages should be deleted per channel.
 
-```
+```yaml
 CHANNEL_PRUNING_POLICY
 channel_name: <human_readable_name>
 channel_id: <discord_channel_id>
@@ -95,7 +95,7 @@ delete_older_than_days: <integer>
 #### MEMBER_ACTIVITY_POLICY
 Defines when members are considered inactive and which roles represent active vs inactive members.
 
-```
+```yaml
 MEMBER_ACTIVITY_POLICY
 inactive_after_days: <integer>
 active_role_id: <discord_role_id>
@@ -109,7 +109,7 @@ These records store the bot’s memory and progress so it can safely restart. Wi
 #### MEMBER_ACTIVITY
 Tracks each member’s last known activity and role state.
 
-```
+```yaml
 MEMBER_ACTIVITY
 user_id: <discord_user_id>
 status: active | inactive
@@ -120,7 +120,7 @@ last_seen_message_id: <discord_message_id>
 #### CHANNEL_READING_CURSOR
 Tracks how far the bot has processed messages within a channel.  This prevents the bot from re-reading old messages after restarting.
 
-```
+```yaml
 CHANNEL_READING_CURSOR
 channel_id: <discord_channel_id>
 last_read_message_id: <discord_message_id>
@@ -130,7 +130,7 @@ last_read_at: <ISO_UTC_timestamp>
 #### CHANNEL_PRUNING_CURSOR
 Tracks how far the bot has checked messages for deletion in a channel.  This helps the bot avoid scanning the same messages repeatedly.
 
-```
+```yaml
 CHANNEL_PRUNING_CURSOR
 channel_id: <discord_channel_id>
 last_checked_message_id: <discord_message_id>

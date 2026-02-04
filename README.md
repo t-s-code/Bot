@@ -117,11 +117,11 @@ last_seen_at: <ISO_UTC_timestamp>
 last_seen_message_id: <discord_message_id>
 ```
 
-#### CHANNEL_READING_CURSOR
+#### CHANNEL_SCANNING_CURSOR
 Tracks how far the bot has processed messages within a channel.  This prevents the bot from re-reading old messages after restarting.
 
 ```yaml
-CHANNEL_READING_CURSOR
+CHANNEL_SCANNING_CURSOR
 channel_id: <discord_channel_id>
 last_read_message_id: <discord_message_id>
 last_read_at: <ISO_UTC_timestamp>

@@ -54,8 +54,10 @@ class Bot(discord.Client):
     async def setup_hook(self):
         self.dry_run = DryRun(is_dry_run=self._is_dry_run)
 
+        disord_client = self
+        
         self.config_channel = ConfigChannel(
-            discord_client=self,
+            discord_client=disord_client,
             config_channel_id=self._config_channel_id,
         )
 
@@ -66,18 +68,21 @@ class Bot(discord.Client):
         asyncio.create_task(self.run_periodic_jobs())
 
     def _build_config_dependent_services(self, config):
+
+        discord_client = self
+        
         self.database_channel = DatabaseChannel(
-            discord_client=self,
+            discord_client=discord_client,
             config=config,
         )
 
         self.log_channel = LogChannel(
-            discord_client=self,
+            discord_client=discord_client,
             config=config,
         )
 
         self.member_activity_job = MemberActivityJob(
-            discord_client=self,
+            discord_client=discord_client,
             dry_run=self.dry_run,
             config=config,
             log_channel=self.log_channel,
@@ -85,7 +90,7 @@ class Bot(discord.Client):
         )
 
         self.channel_pruning_job = ChannelPruningJob(
-            discord_client=self,
+            discord_client=discord_client,
             dry_run=self.dry_run,
             config=config,
             log_channel=self.log_channel,
@@ -98,7 +103,7 @@ class Bot(discord.Client):
         )
         
         self.channel_scanning_job = ChannelScanningJob(
-            discord_client=self,
+            discord_client=discord_client,
             processing_lock=self._processing_lock,
             message_processor=self.message_processor,
             database_channel=self.database_channel,
@@ -121,7 +126,7 @@ class Bot(discord.Client):
         Background periodic jobs.
         """
         while True:
-            await asyncio.sleep(300)
+            await asyncio.sleep(5 * 60) # five minutes
 
             async with self._processing_lock:
                 await self.channel_scanning_job.run_scanning_sweep()

@@ -49,8 +49,6 @@ bot/
 
         __init__.py
 
-        config.py
-
         dry_run.py
 
         message_processor.py

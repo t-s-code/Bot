@@ -79,8 +79,10 @@ class ConfigChannel:
 
         pass
 
+    # -------------------------
     # Validation Logic
-    
+    # -------------------------
+
     def _validate_config(self, config):
         """
         Throws if the config object is not valid.
@@ -89,13 +91,36 @@ class ConfigChannel:
 
         Gives useful error messages for moderators when validation fails.
         """
-        pass
 
-    def _validate_channel_prunning_policies(self, channel_prunning_policies):
-        # TODO validate channel_prunning_policies.channel_id is unique
-        pass
-    
-    def _validate_channel_prunning_policy(self, channel_prunning_policy):
-        # TODO validate channel_id is a positive number
-        # TODO validate delete_older_than_days is a postive number
-        pass
+        self._validate_channel_pruning_policies(
+            config.channel_pruning_policies
+        )
+
+    def _validate_channel_pruning_policies(self, channel_pruning_policies):
+        for policy in channel_pruning_policies:
+            try:
+                self._validate_channel_pruning_policy(policy)
+            except e:
+                raise ValueError(
+                    f"Encountered error while parsing the ChannelPruningPolicy for channel_id={policy.channel_id}",
+                    e
+                )
+
+        # Validate uniqueness of channel_id across policies
+        unique_channel_ids = set(policy.channel_id for policy in channel_pruning_policies)
+        if len(channel_pruning_policies) != len(unique_channel_ids):
+            duplicate_channel_id = channel_pruning_policies.remove_all(unique_channel_ids).first()
+            raise ValueError(
+                f"There was more than one ChannelPruningPolicy defined for channel_id={duplicate_channel_id}"
+            )
+
+    def _validate_channel_pruning_policy(self, channel_pruning_policy):
+        if channel_pruning_policy.channel_id <= 0:
+            raise ValueError(
+                f"Invalid channel_id={channel_pruning_policy.channel_id}. Expected a positive number."
+            )
+
+        if channel_pruning_policy.delete_older_than_days <= 0:
+            raise ValueError(
+                f"Invalid delete_older_than_days={channel_pruning_policy.delete_older_than_days}. Please specify a number greater than 0."
+            )

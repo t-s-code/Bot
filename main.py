@@ -139,7 +139,7 @@ class Bot:
             database_channel=self.database_channel,
         )
 
-        # Processor (depends on jobs + scanning job)
+        # Message Processor (depends on jobs)
         self.message_processor = MessageProcessor(
             member_activity_job=self.member_activity_job,
             database_channel=self.database_channel,
@@ -152,7 +152,7 @@ class Bot:
 
     async def run_periodic_jobs(self):
         while True:
-            await asyncio.sleep(5 * 60)
+            await asyncio.sleep(5 * 60) # five minutes
 
             async with self._processing_lock:
                 await self.channel_scanning_job.run_scanning_sweep()

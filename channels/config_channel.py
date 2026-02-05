@@ -79,6 +79,32 @@ class ConfigChannel:
 
         pass
 
+    def _parse_config(self, message_text):
+        """
+        Creates a Config object from a message like:
+        
+        ```
+        # Bot Config
+        Please read the following link before updating our bot's config: TODO LINK.
+        
+        ━━━━━━━━━━━━━━━━
+        
+        ## Channel Pruning
+        
+        - #introductions = 30 days
+        - #chat = 7 days
+        
+        ━━━━━━━━━━━━━━━━
+        
+        ## Member Inactivity
+        
+        - Active role = @Active
+        - Inactive role = @Inactive
+        - Days until inactive = 30 days
+        ```
+        """
+        pass
+
     # -------------------------
     # Validation Logic
     # -------------------------

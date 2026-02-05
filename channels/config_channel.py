@@ -9,7 +9,7 @@ class ConfigChannel:
 
     When a moderator posts a new message in #bot-config
     - The latest message is parsed into a config object
-    - If valid, the bot hot reloads using the new config
+    - If valid, the bot hot reloads using the new config and posts a success message in this channel
     - If invalid, the bot replies with a moderator-friendly error
     """
 
@@ -20,27 +20,34 @@ class ConfigChannel:
 
     async def get_config(self):
         """
-        Returns the latest valid config.
+        Returns the config that was most recently active.
 
-        If not already cached, scans channel history until a valid
-        config is found.
+        If this bot is starting up:
+        - Scan config channel history
+        - Locate the last success message writen by the bot
+        - Load the config from the message linked to by the success message
+        - If there are no success messages in the channel, try loading the config from the last message not authored by a bot
+        
+        If the bot is already running:
+        - Return the config that is currently in use
         """
+
         if self._latest_valid_config is not None:
             return self._latest_valid_config
 
-        # TODO scan config channel history
-        # TODO locate most recent valid config
-        # TODO set self._latest_valid_config
+        # TODO scan config channel history for latest success message
+        # TODO load the config from the message that is linked to
+        # TODO load the config from the last message not written by a bot, if there were no success messages in the channel
+        # TODO parse config message into config object
 
-        raise RuntimeError("No valid config found in config channel.")
+        config = None  # placeholder for parsed config
+
+        self._validate_config(config)
+
+        self._latest_valid_config = config
+        return config
 
     async def handle_possible_config_update(self, message):
-        """
-        Signal method called when any Discord message event occurs.
-
-        If the message is in the config channel, attempt to load
-        the latest config snapshot.
-        """
         if message.channel.id != self._config_channel_id:
             return False
 
@@ -70,4 +77,25 @@ class ConfigChannel:
         # TODO call self._bot.request_hot_reload()
         # TODO reply with moderator-friendly error on failure
 
+        pass
+
+    # Validation Logic
+    
+    def _validate_config(self, config):
+        """
+        Throws if the config object is not valid.
+
+        Prevents trivial mistakes in configs from being loaded.
+
+        Gives useful error messages for moderators when validation fails.
+        """
+        pass
+
+    def _validate_channel_prunning_policies(self, channel_prunning_policies):
+        # TODO validate channel_prunning_policies.channel_id is unique
+        pass
+    
+    def _validate_channel_prunning_policy(self, channel_prunning_policy):
+        # TODO validate channel_id is a positive number
+        # TODO validate delete_older_than_days is a postive number
         pass

@@ -33,7 +33,7 @@ Fun fact &mdash; this bot was created with the help of ChatGPT 🙏 We pair prog
 ## Project (File) Hierarchy
 Below is a birds-eye view of the files which bring our bot to life.
 
-```
+```yaml
 
 bot/
 
@@ -48,8 +48,6 @@ bot/
     core/ # The core utilities our bot needs to do its job well.
 
         __init__.py
-
-        config.py
 
         dry_run.py
 
@@ -69,10 +67,11 @@ bot/
 
         __init__.py
 
-        member_activity_job.py  # Converts members from active to inactive & vice-versa
+        member_activity_job.py  # Converts members from active to inactive & vice-versa.
 
-        channel_pruning_job.py # Deletes messages from channels that are older than we defined in #bot-config
+        channel_pruning_job.py # Deletes messages from channels that are older than we defined in #bot-config.
 
+        channel_scanning_job.py # Scans messages from channels and updates database. Ensures we don't lose any member activity if Discord events are missed.
 ```
 
 ## Data Models
@@ -85,7 +84,7 @@ These records define the bot’s behavior and moderation policies.
 #### CHANNEL_PRUNING_POLICY
 Defines when messages should be deleted per channel.
 
-```
+```yaml
 CHANNEL_PRUNING_POLICY
 channel_name: <human_readable_name>
 channel_id: <discord_channel_id>
@@ -95,7 +94,7 @@ delete_older_than_days: <integer>
 #### MEMBER_ACTIVITY_POLICY
 Defines when members are considered inactive and which roles represent active vs inactive members.
 
-```
+```yaml
 MEMBER_ACTIVITY_POLICY
 inactive_after_days: <integer>
 active_role_id: <discord_role_id>
@@ -109,7 +108,7 @@ These records store the bot’s memory and progress so it can safely restart. Wi
 #### MEMBER_ACTIVITY
 Tracks each member’s last known activity and role state.
 
-```
+```yaml
 MEMBER_ACTIVITY
 user_id: <discord_user_id>
 status: active | inactive
@@ -117,11 +116,11 @@ last_seen_at: <ISO_UTC_timestamp>
 last_seen_message_id: <discord_message_id>
 ```
 
-#### CHANNEL_READING_CURSOR
+#### CHANNEL_SCANNING_CURSOR
 Tracks how far the bot has processed messages within a channel.  This prevents the bot from re-reading old messages after restarting.
 
-```
-CHANNEL_READING_CURSOR
+```yaml
+CHANNEL_SCANNING_CURSOR
 channel_id: <discord_channel_id>
 last_read_message_id: <discord_message_id>
 last_read_at: <ISO_UTC_timestamp>
@@ -130,7 +129,7 @@ last_read_at: <ISO_UTC_timestamp>
 #### CHANNEL_PRUNING_CURSOR
 Tracks how far the bot has checked messages for deletion in a channel.  This helps the bot avoid scanning the same messages repeatedly.
 
-```
+```yaml
 CHANNEL_PRUNING_CURSOR
 channel_id: <discord_channel_id>
 last_checked_message_id: <discord_message_id>

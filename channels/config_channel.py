@@ -24,7 +24,7 @@ class ConfigChannel:
 
         If this bot is starting up:
         - Scan config channel history
-        - Locate the last success message writen by the bot
+        - Locate the last success message written by the bot
         - Load the config from the message linked to by the success message
         - If there are no success messages in the channel, try loading the config from the last message not authored by a bot
         
@@ -100,19 +100,19 @@ class ConfigChannel:
         for policy in channel_pruning_policies:
             try:
                 self._validate_channel_pruning_policy(policy)
-            except e:
+            except Exception as e:
                 raise ValueError(
-                    f"Encountered error while parsing the ChannelPruningPolicy for channel_id={policy.channel_id}",
-                    e
-                )
+                    f"Encountered error while parsing the ChannelPruningPolicy for channel_id={policy.channel_id} (channel_name={policy.channel_name})."
+                ) from e
 
         # Validate uniqueness of channel_id across policies
-        unique_channel_ids = set(policy.channel_id for policy in channel_pruning_policies)
-        if len(channel_pruning_policies) != len(unique_channel_ids):
-            duplicate_channel_id = channel_pruning_policies.remove_all(unique_channel_ids).first()
-            raise ValueError(
-                f"There was more than one ChannelPruningPolicy defined for channel_id={duplicate_channel_id}"
-            )
+        seen = set()
+        for policy in channel_pruning_policies:
+            if policy.channel_id in seen:
+                raise ValueError(
+                    f"There was more than one ChannelPruningPolicy defined for channel_id={policy.channel_id} (channel_name={policy.channel_name})."
+                )
+            seen.add(policy.channel_id)
 
     def _validate_channel_pruning_policy(self, channel_pruning_policy):
         if channel_pruning_policy.channel_id <= 0:

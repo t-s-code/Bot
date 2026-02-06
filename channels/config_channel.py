@@ -79,6 +79,10 @@ class ConfigChannel:
 
         pass
 
+    # -------------------------
+    # Parsing 
+    # -------------------------
+
     def _parse_config(self, message_text):
         """
         Creates a Config object from a message like:
@@ -103,10 +107,57 @@ class ConfigChannel:
         - Days until inactive = 30 days
         ```
         """
+        # TODO split message_text into individual lines
+        
+        # TODO normalize lines
+        #   - strip whitespace
+        #   - ignore lines that are not either
+        #      - (a) a markdown heading
+        #      - or (b) a markdown bullet item
+        #      - Examples of ignored lines: whitespace lines, decorative lines, paragraphs (comments)
+        #      - Throw if there are any code block lines or html lines (these could easily break this simple parser)
+
+        # TODO locate line indicies for expected headings
+        #   - heading like: "# Our Bot's Config"
+        #   - heading like: "## Channel Pruning"
+        #   - heading like: "## Member Inactivity"
+        #   - Throw if any other headings are discovered
+
+        # TODO use section heading indicies to group lines per section
+
+        # TODO parse each markdown bullet from each section into tuples
+        #   - expect format: "- STRING_1 = STRING_2" (ignore extra whitespace)
+        #   - result: list of (STRING_1, STRING_2)
+        #   - Throw if there are any other lines in the section (should have been handled by normalization)
+        
+        # TODO parse Channel Pruning's tuples into List[ChannelPruningPolicy]
+
+        # TODO Member Activity's tuples into MemberActivityPolicy
+        
+        # TODO construct Config object from parsed sections
+
+        # TODO return Config
+        pass
+
+    def _parse_channel_pruning_policy(self, policy_tuple):
+        # TODO: parse channel pruning policy tuple into dataclass
+        #   - extract channel mention (#channel) from first element
+        #   - extract N as integer from second element (expected format: "N days" or "N day")
+        #   - resolve channel mention → channel_id + channel_name
+        #   - construct ChannelPruningPolicy object
+
+        # TODO return ChannelPruningPolicy
+        pass
+
+    def _parse_member_activity_policy(self, policy_tuple):
+        #   - enforce required field ordering
+        #   - parse roles and days values
+        
+        # TODO return MemberActivityPolicy
         pass
 
     # -------------------------
-    # Validation Logic
+    # Validation
     # -------------------------
 
     def _validate_config(self, config):

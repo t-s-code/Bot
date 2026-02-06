@@ -13,8 +13,10 @@ class ConfigChannel:
     - If invalid, the bot replies with a moderator-friendly error
     """
 
-    def __init__(self, bot, config_channel_id):
+    def __init__(self, bot, discord_client, config_channel_id):
         self._bot = bot
+        self._discord_client = discord_client
+        self._config_parser = _ConfigParser(discord_client)
         self._config_channel_id = config_channel_id
         self._latest_valid_config = None
 
@@ -80,128 +82,6 @@ class ConfigChannel:
         pass
 
     # -------------------------
-    # Parsing 
-    # -------------------------
-
-    def _parse_config(self, message_text):
-        """
-        Creates a Config object from a message like:
-        
-        ```
-        # Bot Config
-        Please read the following link before updating our bot's config: TODO LINK.
-        
-        ━━━━━━━━━━━━━━━━
-        
-        ## Channel Pruning
-        
-        - #introductions = 30 days
-        - #chat = 7 days
-        
-        ━━━━━━━━━━━━━━━━
-        
-        ## Member Inactivity
-        
-        - Active role = @Active
-        - Inactive role = @Inactive
-        - Days until inactive = 30 days
-        ```
-        """
-        # TODO split message_text into individual lines
-
-        # TODO normalize lines into a simplified representation
-        #   - strip whitespace
-        #   - ignore lines that are not either:
-        #       (a) markdown heading
-        #       (b) markdown bullet item (supports "-" and "*")
-        #   - treat headings case-insensitively
-        #   - treat heading level (#, ##, ###, etc.) as irrelevant
-        #   - Throw if any code block markers (```) or html-like tags (<...>) are found
-        #
-        #   Result should be a list of normalized line objects or tuples that contain:
-        #       - line_type: "heading" or "bullet"
-        #       - content: normalized text
-
-        # TODO build section map
-        #   - Create dict[str, List[str]] mapping:
-        #       normalized_section_name -> bullet lines
-        #
-        #   Expected sections:
-        #       "our bot config"
-        #       "channel pruning"
-        #       "member inactivity"
-        #
-        #   Requirements:
-        #       - Sections are case-insensitive
-        #       - Heading level (# vs ## etc.) is ignored
-        #       - Throw if:
-        #           * duplicate section appears
-        #           * unknown section appears
-        #           * any required section is missing
-
-        # TODO parse bullet lines into tuples
-        #   - expect format: "- STRING_1 = STRING_2" OR "* STRING_1 = STRING_2"
-        #   - ignore extra whitespace around "="
-        #   - output: List[(STRING_1, STRING_2)]
-        #   - Throw if bullet does not match expected format
-
-        # TODO parse Channel Pruning section
-        #   - Convert tuples -> List[ChannelPruningPolicy]
-
-        # TODO parse Member Inactivity section
-        #   - Convert tuples -> MemberActivityPolicy
-        
-        # TODO construct Config object from parsed sections
-
-        # TODO return Config
-        pass
-
-
-    def _parse_channel_pruning_section(self, policy_tuples):
-        """
-        Converts tuples into List[ChannelPruningPolicy]
-        """
-
-        # For each tuple:
-        
-        #    TODO extract channel mention (<#channel_id>) from first element
-        #    TODO extract N as reminder days integer from second element
-        #      - Accept "N day" or "N days" (case-insensitive)
-
-        #    TODO resolve channel mention -> channel_id + channel_name using discord client
-
-        #    TODO construct ChannelPruningPolicy
-
-        # TODO return List[ChannelPruningPolicy]
-        pass
-
-
-    def _parse_member_activity_section(self, policy_tuples):
-        """
-        Converts tuples into MemberActivityPolicy
-        """
-
-        # Expected fields (case-insensitive keys):
-        #   - "Active role"
-        #   - "Inactive role"
-        #   - "Days until inactive"
-
-        # TODO convert tuples into dictionary: field_name -> value
-
-        # TODO validate:
-        #   - all required fields exist
-        #   - no unknown fields exist
-
-        # TODO parse:
-        #   - role mentions -> role_id + role_name
-        #   - days value -> integer (accept "N day(s)")
-
-        # TODO construct MemberActivityPolicy
-
-        # TODO return MemberActivityPolicy
-        pass
-
-    # -------------------------
     # Validation
     # -------------------------
 
@@ -246,3 +126,132 @@ class ConfigChannel:
             raise ValueError(
                 f"Invalid delete_older_than_days={channel_pruning_policy.delete_older_than_days}. Please specify a number greater than 0."
             )
+
+class _ConfigParser:
+    """
+    Responsible for converting raw config message text into Config objects.
+    """
+
+    def __init__(self, discord_client):
+        self._discord_client = discord_client
+
+    def parse(self, message_text):
+        """
+        Creates a Config object from a message like:
+        
+        ```
+        # Bot Config
+        Please read the following link before updating our bot's config: TODO LINK.
+        
+        ━━━━━━━━━━━━━━━━
+        
+        ## Channel Pruning
+        
+        - #introductions = 30 days
+        - #chat = 7 days
+        
+        ━━━━━━━━━━━━━━━━
+        
+        ## Member Inactivity
+        
+        - Active role = @Active
+        - Inactive role = @Inactive
+        - Days until inactive = 30 days
+        ```
+        """
+
+        # TODO split message_text into individual lines
+
+        # TODO normalize lines into a simplified representation
+        #   - strip whitespace
+        #   - ignore lines that are not either:
+        #       (a) markdown heading
+        #       (b) markdown bullet item (supports "-" and "*")
+        #   - treat headings case-insensitively
+        #   - treat heading level (#, ##, ###, etc.) as irrelevant
+        #   - Throw if any code block markers (```) or html-like tags (<...>) are found
+        #
+        #   Result should be a list of normalized line objects or tuples that contain:
+        #       - line_type: "heading" or "bullet"
+        #       - content: normalized text
+
+        # TODO build section map
+        #   - Create dict[str, List[str]] mapping:
+        #       normalized_section_name -> bullet lines
+        #
+        #   Expected sections:
+        #       "our bot config"
+        #       "channel pruning"
+        #       "member inactivity"
+        #
+        #   Requirements:
+        #       - Sections are case-insensitive
+        #       - Heading level (# vs ## etc.) is ignored
+        #       - Throw if:
+        #           * duplicate section appears
+        #           * unknown section appears
+        #           * any required section is missing
+
+        # TODO parse bullet lines into tuples
+        #   - expect format: "- STRING_1 = STRING_2" OR "* STRING_1 = STRING_2"
+        #   - ignore extra whitespace around "="
+        #   - output: List[(STRING_1, STRING_2)]
+        #   - Throw if bullet does not match expected format
+
+        # TODO parse Channel Pruning section
+        #   - Convert tuples -> List[ChannelPruningPolicy]
+
+        # TODO parse Member Inactivity section
+        #   - Convert tuples -> MemberActivityPolicy
+
+        # TODO construct Config object from parsed sections
+
+        # TODO return Config
+        pass
+
+    # -------------------------
+    # Section Parsers
+    # -------------------------
+
+    def _parse_channel_pruning_section(self, policy_tuples):
+        """
+        Converts tuples into List[ChannelPruningPolicy]
+        """
+
+        # For each tuple:
+
+        #    TODO extract channel mention (<#channel_id>) from first element
+        #    TODO extract N as reminder days integer from second element
+        #      - Accept "N day" or "N days" (case-insensitive)
+
+        #    TODO resolve channel mention -> channel_id + channel_name using discord client
+
+        #    TODO construct ChannelPruningPolicy
+
+        # TODO return List[ChannelPruningPolicy]
+        pass
+
+    def _parse_member_activity_section(self, policy_tuples):
+        """
+        Converts tuples into MemberActivityPolicy
+        """
+
+        # Expected fields (case-insensitive keys):
+        #   - "Active role"
+        #   - "Inactive role"
+        #   - "Days until inactive"
+
+        # TODO convert tuples into dictionary: field_name -> value
+
+        # TODO validate:
+        #   - all required fields exist
+        #   - no unknown fields exist
+
+        # TODO parse:
+        #   - role mentions -> role_id + role_name
+        #   - days value -> integer (accept "N day(s)")
+
+        # TODO construct MemberActivityPolicy
+
+        # TODO return MemberActivityPolicy
+        pass

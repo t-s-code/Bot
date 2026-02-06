@@ -132,6 +132,27 @@ class _ConfigParser:
     Responsible for converting raw config message text into Config objects.
     """
 
+    # -------------------------
+    # Section Constants
+    # -------------------------
+
+    SECTION_ROOT = "our bot config"
+    SECTION_CHANNEL_PRUNING = "channel pruning"
+    SECTION_MEMBER_INACTIVITY = "member inactivity"
+
+    REQUIRED_SECTIONS = {
+        SECTION_ROOT,
+        SECTION_CHANNEL_PRUNING,
+        SECTION_MEMBER_INACTIVITY,
+    }
+
+    # Member inactivity expected fields (normalized keys)
+    MEMBER_ACTIVITY_FIELDS = {
+        "active role",
+        "inactive role",
+        "days until inactive",
+    }
+
     def __init__(self, discord_client):
         self._discord_client = discord_client
 
@@ -161,6 +182,7 @@ class _ConfigParser:
         """
 
         # TODO split message_text into individual lines
+        #   - Preserve original line numbers for error reporting
 
         # TODO normalize lines into a simplified representation
         #   - strip whitespace
@@ -171,21 +193,17 @@ class _ConfigParser:
         #   - treat heading level (#, ##, ###, etc.) as irrelevant
         #   - Throw if any code block markers (```) or html-like tags (<...>) are found
         #
-        #   Result should be a list of normalized line objects or tuples that contain:
-        #       - line_type: "heading" or "bullet"
-        #       - content: normalized text
+        #   Each normalized entry should conceptually contain:
+        #       - line_number (int)
+        #       - raw_line (str)
+        #       - line_type: "heading" | "bullet"
+        #       - normalized_content (str)
 
         # TODO build section map
-        #   - Create dict[str, List[str]] mapping:
-        #       normalized_section_name -> bullet lines
-        #
-        #   Expected sections:
-        #       "our bot config"
-        #       "channel pruning"
-        #       "member inactivity"
+        #   - Create dict[section name, List[normalized line in section]]
         #
         #   Requirements:
-        #       - Sections are case-insensitive
+        #       - Normalize section names to lowercase
         #       - Heading level (# vs ## etc.) is ignored
         #       - Throw if:
         #           * duplicate section appears
@@ -194,15 +212,14 @@ class _ConfigParser:
 
         # TODO parse bullet lines into tuples
         #   - expect format: "- STRING_1 = STRING_2" OR "* STRING_1 = STRING_2"
+        #   - split on FIRST "=" only
         #   - ignore extra whitespace around "="
-        #   - output: List[(STRING_1, STRING_2)]
+        #   - output: List[ParsedBullet] = List[(normalized line, key, value)]
         #   - Throw if bullet does not match expected format
 
         # TODO parse Channel Pruning section
-        #   - Convert tuples -> List[ChannelPruningPolicy]
 
         # TODO parse Member Inactivity section
-        #   - Convert tuples -> MemberActivityPolicy
 
         # TODO construct Config object from parsed sections
 
@@ -213,15 +230,15 @@ class _ConfigParser:
     # Section Parsers
     # -------------------------
 
-    def _parse_channel_pruning_section(self, policy_tuples):
+    def _parse_channel_pruning_section(self, parsed_bullets):
         """
-        Converts tuples into List[ChannelPruningPolicy]
+        Converts parsed bullets into List[ChannelPruningPolicy]
         """
 
         # For each tuple:
 
-        #    TODO extract channel mention (<#channel_id>) from first element
-        #    TODO extract N as reminder days integer from second element
+        #    TODO extract channel mention (<#channel_id>) from key
+        #    TODO extract N as reminder days integer from value
         #      - Accept "N day" or "N days" (case-insensitive)
 
         #    TODO resolve channel mention -> channel_id + channel_name using discord client
@@ -233,15 +250,17 @@ class _ConfigParser:
 
     def _parse_member_activity_section(self, policy_tuples):
         """
-        Converts tuples into MemberActivityPolicy
+        Converts parsed bullets into MemberActivityPolicy
         """
 
-        # Expected fields (case-insensitive keys):
-        #   - "Active role"
-        #   - "Inactive role"
-        #   - "Days until inactive"
+        # TODO convert tuples into dictionary:
+        #   normalized_field_name -> (value, normalized line)
 
-        # TODO convert tuples into dictionary: field_name -> value
+        #   Field normalization rules:
+        #       - lowercase
+        #       - collapse extra whitespace
+        #       Example:
+        #           "Active   Role" -> "active role"
 
         # TODO validate:
         #   - all required fields exist

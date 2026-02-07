@@ -322,7 +322,7 @@ class _ConfigParser:
                         line.raw_text
                     )
 
-                if section.normalized_name in section_map:
+                if section in section_map:
                     raise _ParseError(
                         f'Duplicate section: "{section.display_name}". '
                         'Please only define each section once.',
@@ -340,19 +340,20 @@ class _ConfigParser:
                 else:
                     section_map[current_section].append(line)
 
-        required_sections = {section for section in _SectionHeading.values()}
+        required_sections = set(_SectionHeading.values())
         missing_sections = required_sections - set(section_map.keys())
 
         if missing_sections:
             missing_section_names = [
                 section.display_name
-                for section in missing_sections
+                for section in _SectionHeading.values()
+                if section not in section_map
             ]
 
             raise _ParseError(
-                f'Missing required section(s): {", ".join(missing_setion_names)}.',
-                0,
-                ""
+                f'Missing required section(s): {", ".join(missing_section_names)}.',
+                -1,
+                "N/A"
             )
 
         return section_map

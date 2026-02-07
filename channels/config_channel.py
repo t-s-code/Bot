@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum, auto
+import re
 
 import discord
 
@@ -135,9 +136,7 @@ class _ConfigParser:
     Responsible for converting raw config message text into Config objects.
     """
 
-    # -------------------------
-    # Section Constants
-    # -------------------------
+    HTML_LIKE_PATTERN = re.compile(r"<[^>]+>")
 
     SECTION_ROOT = "our bot config"
     SECTION_CHANNEL_PRUNING = "channel pruning"
@@ -184,17 +183,8 @@ class _ConfigParser:
         ```
         """
 
-        # TODO split message_text into individual lines
-        #   - Preserve original line numbers for error reporting
-
-        # TODO normalize lines into a simplified representation
-        #   - strip whitespace
-        #   - ignore lines that are not either:
-        #       (a) markdown heading
-        #       (b) markdown bullet item (supports "-" and "*")
-        #   - treat headings case-insensitively
-        #   - treat heading level (#, ##, ###, etc.) as irrelevant
-        #   - Throw if any code block markers (```) or html-like tags (<...>) are found
+        raw_lines = message_text.splitlines()
+        normalized_lines = self._normalize_lines(raw_lines)
 
         # TODO build section map
         #   - Create dict[section name, List[normalized line in section]]
@@ -222,6 +212,56 @@ class _ConfigParser:
 
         # TODO return Config
         pass
+
+    def _normalize_lines(self, raw_lines):
+        normalized_lines = []
+
+        for line_num, raw_line in enumerate(raw_lines, start=1):
+            stripped_text = raw_line.strip()
+
+            if not stripped_text:
+                continue # ignore lines that are empty or purely whitespace
+
+            if "```" in stripped_text:
+                raise _ParseError(
+                    "Code blocks (```) are not allowed.",
+                    line_num,
+                    raw_line
+                )
+
+            if HTML_LIKE_PATTERN.search(stripped_text):
+                raise _ParseError(
+                    "HTML tags are not allowed.",
+                    line_num,
+                    raw_line
+                )
+
+            line_type = None
+            normalized_text = None
+
+            if stripped_text.startswith("#"):
+                line_type = _LineType.HEADING
+                normalized_text = stripped_text.lstrip("#").strip().lower()
+
+            elif stripped_text.startswith("-") or stripped_text.startswith("*"):
+                line_type = _LineType.BULLET
+                normalized_text = stripped_text[1:].strip()
+
+            else:
+                # Ignore all other lines (comments, decorative lines, paragraphs, etc.)
+                pass
+
+            if line_type is not None:
+                normalized_lines.append(
+                    _NormalizedLine(
+                        raw_text=raw_line,
+                        line_number=line_num,
+                        line_type=line_type,
+                        normalized_text=normalized_text,
+                    )
+                )
+
+        return normalized_lines
 
     # -------------------------
     # Section Parsers
@@ -272,6 +312,12 @@ class _ConfigParser:
         # TODO return MemberActivityPolicy
         pass
 
+class _ParseError(ValueError):
+    def __init__(self, message: str, line_num: int, raw_text: str):
+        super().__init__(message)
+        self.line_num = line_num
+        self.raw_text = raw_text
+        
 class _LineType(Enum):
     HEADING = auto()
     BULLET = auto()

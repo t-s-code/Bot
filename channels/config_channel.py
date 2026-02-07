@@ -222,7 +222,7 @@ class _ConfigParser:
             if not stripped_text:
                 continue # ignore lines that are empty or purely whitespace
 
-            if "```" in stripped_text:
+            if stripped_text.startswith("```"):
                 raise _ParseError(
                     "Code blocks (```) are not allowed.",
                     line_num,

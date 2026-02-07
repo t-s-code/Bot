@@ -20,8 +20,8 @@ class ConfigChannel:
     def __init__(self, bot, discord_client, config_channel_id):
         self._bot = bot
         self._discord_client = discord_client
-        self._config_parser = _ConfigParser(discord_client)
         self._config_channel_id = config_channel_id
+        self._config_parser = _ConfigParser()
         self._latest_valid_config = None
 
     async def get_config(self):
@@ -175,9 +175,6 @@ class _SectionHeading(Enum):
     def display_names(cls):
         return [section.display_name for section in cls]
 
-
-
-
 class _ConfigParser:
     """
     Converts raw config message text into Config objects.
@@ -191,9 +188,6 @@ class _ConfigParser:
         "inactive role",
         "days until inactive",
     }
-
-    def __init__(self, discord_client):
-        self._discord_client = discord_client
 
     def parse(self, message_text):
         """
@@ -221,18 +215,10 @@ class _ConfigParser:
         """
 
         raw_lines = message_text.splitlines()
+
         normalized_lines = self._normalize_lines(raw_lines)
 
-        # TODO build section map
-        #   - Create dict[section name, List[normalized line in section]]
-        #
-        #   Requirements:
-        #       - Normalize section names to lowercase
-        #       - Heading level (# vs ## etc.) is ignored
-        #       - Throw if:
-        #           * duplicate section appears
-        #           * unknown section appears
-        #           * any required section is missing
+        normalized_lines_by_section = self._build_section_map(normalized_lines)
 
         # TODO parse bullet lines into tuples
         #   - expect format: "- STRING_1 = STRING_2" OR "* STRING_1 = STRING_2"
@@ -242,6 +228,9 @@ class _ConfigParser:
         #   - Throw if bullet does not match expected format
 
         # TODO parse Channel Pruning section
+        # TODO move channel_name  discord api lookup call to ConfigChannel...
+        #   - parse() should return a Config where every ChannelPruningPolicy has channel_id defined but channel_name set to None
+        #   - in ConfigChannel, we'll create a "lookup channel names" method which we copy the immutable Config object to a new Config object, but with the channel_names defined.
 
         # TODO parse Member Inactivity section
 

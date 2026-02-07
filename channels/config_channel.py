@@ -180,20 +180,10 @@ class _SectionHeading(Enum):
 
 class _ConfigParser:
     """
-    Responsible for converting raw config message text into Config objects.
+    Converts raw config message text into Config objects.
     """
 
     HTML_LIKE_PATTERN = re.compile(r"<[^>]+>")
-
-    SECTION_ROOT = "our bot config"
-    SECTION_CHANNEL_PRUNING = "channel pruning"
-    SECTION_MEMBER_INACTIVITY = "member inactivity"
-
-    REQUIRED_SECTIONS = {
-        SECTION_ROOT,
-        SECTION_CHANNEL_PRUNING,
-        SECTION_MEMBER_INACTIVITY,
-    }
 
     # Member inactivity expected fields (normalized keys)
     MEMBER_ACTIVITY_FIELDS = {

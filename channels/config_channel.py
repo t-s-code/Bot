@@ -229,7 +229,7 @@ class _ConfigParser:
                     raw_line
                 )
 
-            if HTML_LIKE_PATTERN.search(stripped_text):
+            if self.HTML_LIKE_PATTERN.search(stripped_text):
                 raise _ParseError(
                     "HTML tags are not allowed.",
                     line_num,
@@ -241,7 +241,7 @@ class _ConfigParser:
 
             if stripped_text.startswith("#"):
                 line_type = _LineType.HEADING
-                normalized_text = stripped_text.lstrip("#").strip().lower()
+                normalized_text = stripped_text.strip("# ").strip().lower()
 
             elif stripped_text.startswith("-") or stripped_text.startswith("*"):
                 line_type = _LineType.BULLET
@@ -317,7 +317,9 @@ class _ParseError(ValueError):
         super().__init__(message)
         self.line_num = line_num
         self.raw_text = raw_text
-        
+    def __str__(self):
+        return f"{super().__str__()} (line {self.line_num}: {self.raw_text})"
+    
 class _LineType(Enum):
     HEADING = auto()
     BULLET = auto()

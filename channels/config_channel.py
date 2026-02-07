@@ -1,5 +1,8 @@
 # channels/config_channel.py
 
+from dataclasses import dataclass
+from enum import Enum, auto
+
 import discord
 
 
@@ -192,12 +195,6 @@ class _ConfigParser:
         #   - treat headings case-insensitively
         #   - treat heading level (#, ##, ###, etc.) as irrelevant
         #   - Throw if any code block markers (```) or html-like tags (<...>) are found
-        #
-        #   Each normalized entry should conceptually contain:
-        #       - line_number (int)
-        #       - raw_line (str)
-        #       - line_type: "heading" | "bullet"
-        #       - normalized_content (str)
 
         # TODO build section map
         #   - Create dict[section name, List[normalized line in section]]
@@ -274,3 +271,14 @@ class _ConfigParser:
 
         # TODO return MemberActivityPolicy
         pass
+
+class _LineType(Enum):
+    HEADING = auto()
+    BULLET = auto()
+
+@dataclass(frozen=True)
+class _NormalizedLine:
+    raw_text: str
+    line_number: int
+    line_type: _LineType
+    normalized_text: str

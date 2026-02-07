@@ -131,6 +131,53 @@ class ConfigChannel:
                 f"Invalid delete_older_than_days={channel_pruning_policy.delete_older_than_days}. Please specify a number greater than 0."
             )
 
+
+# --------------------------------
+# Helpers
+# --------------------------------
+
+class _ParseError(ValueError):
+    def __init__(self, message: str, line_num: int, raw_text: str):
+        super().__init__(message)
+        self.line_num = line_num
+        self.raw_text = raw_text
+    def __str__(self):
+        return f"{super().__str__()} (line {self.line_num}: {self.raw_text})"
+    
+class _LineType(Enum):
+    HEADING = auto()
+    BULLET = auto()
+
+@dataclass(frozen=True)
+class _NormalizedLine:
+    raw_text: str
+    line_number: int
+    line_type: _LineType
+    normalized_text: str
+
+class _SectionHeading(Enum):
+    ROOT = "Our Bot Config"
+    CHANNEL_PRUNING = "Channel Pruning"
+    MEMBER_INACTIVITY = "Member Inactivity"
+
+    def __init__(self, display_name):
+        self.display_name = display_name
+        self.normalized_name = display_name.lower()
+
+    @classmethod
+    def from_normalized(cls, normalized_name):
+        for section in cls:
+            if section.normalized_name == normalized_name:
+                return section
+        return None
+
+    @classmethod
+    def display_names(cls):
+        return [section.display_name for section in cls]
+
+
+
+
 class _ConfigParser:
     """
     Responsible for converting raw config message text into Config objects.
@@ -263,6 +310,63 @@ class _ConfigParser:
 
         return normalized_lines
 
+    def _build_section_map(self, normalized_lines):
+        """
+        Build a map of _SectionHeading -> list[NormalizedLine]
+        Ensure all headings are present that should be present.
+        Ensure no additional headings are present.
+        """
+        section_map = {}
+        current_section = None
+
+        for line in normalized_lines:
+
+            if line.line_type == _LineType.HEADING:
+                section = _SectionHeading.from_normalized(line.normalized_text)
+
+                if section is None:
+                    raise _ParseError(
+                        f'Unexpected section: "{line.normalized_text}". '
+                        f'Expected one of: {", ".join(_SectionHeading.display_names())}.',
+                        line.line_number,
+                        line.raw_text
+                    )
+
+                if section.normalized_name in section_map:
+                    raise _ParseError(
+                        f'Duplicate section: "{section.display_name}". '
+                        'Please only define each section once.',
+                        line.line_number,
+                        line.raw_text
+                    )
+
+                current_section = section
+                section_map[section] = []
+
+            elif line.line_type == _LineType.BULLET:
+                if current_section is None:
+                    # Ignore bullets before the first section.
+                    pass
+                else:
+                    section_map[current_section].append(line)
+
+        required_sections = {section for section in _SectionHeading.values()}
+        missing_sections = required_sections - set(section_map.keys())
+
+        if missing_sections:
+            missing_section_names = [
+                section.display_name
+                for section in missing_sections
+            ]
+
+            raise _ParseError(
+                f'Missing required section(s): {", ".join(missing_setion_names)}.',
+                0,
+                ""
+            )
+
+        return section_map
+
     # -------------------------
     # Section Parsers
     # -------------------------
@@ -311,22 +415,3 @@ class _ConfigParser:
 
         # TODO return MemberActivityPolicy
         pass
-
-class _ParseError(ValueError):
-    def __init__(self, message: str, line_num: int, raw_text: str):
-        super().__init__(message)
-        self.line_num = line_num
-        self.raw_text = raw_text
-    def __str__(self):
-        return f"{super().__str__()} (line {self.line_num}: {self.raw_text})"
-    
-class _LineType(Enum):
-    HEADING = auto()
-    BULLET = auto()
-
-@dataclass(frozen=True)
-class _NormalizedLine:
-    raw_text: str
-    line_number: int
-    line_type: _LineType
-    normalized_text: str

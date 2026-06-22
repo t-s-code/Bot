@@ -15,7 +15,6 @@ import discord
 from core.dry_run import DryRun
 from core.message_processor import MessageProcessor
 
-from channels.config_channel import ConfigChannel
 from channels.database_channel import DatabaseChannel
 from channels.log_channel import LogChannel
 

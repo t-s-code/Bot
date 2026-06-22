@@ -137,7 +137,7 @@ def main():
     token = None
 
     bot = Bot(is_dry_run)
-    # bot.run(token)
+    bot.run(token)
 
 
 if __name__ == "__main__":

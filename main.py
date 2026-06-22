@@ -18,8 +18,6 @@ from core.message_processor import MessageProcessor
 from channels.database_channel import DatabaseChannel
 from channels.log_channel import LogChannel
 
-from jobs.member_activity_job import MemberActivityJob
-from jobs.channel_pruning_job import ChannelPruningJob
 from jobs.channel_scanning_job import ChannelScanningJob
 
 
@@ -31,6 +29,7 @@ class Bot:
             intents=self._build_intents()
         )
 
+        # TODO: when to use?
         self._processing_lock = asyncio.Lock()
 
         # Core utilities
@@ -41,8 +40,6 @@ class Bot:
         self.log_channel = None
 
         # Jobs
-        self.member_activity_job = None
-        self.channel_pruning_job = None
         self.channel_scanning_job = None
 
         # Processing
@@ -105,31 +102,13 @@ class Bot:
         )
 
         # Jobs
-        self.member_activity_job = MemberActivityJob(
-            discord_client=self.discord_client,
-            dry_run=self.dry_run,
-            config=config,
-            log_channel=self.log_channel,
-            database_channel=self.database_channel,
-        )
-
-        self.channel_pruning_job = ChannelPruningJob(
-            discord_client=self.discord_client,
-            dry_run=self.dry_run,
-            config=config,
-            log_channel=self.log_channel,
-            database_channel=self.database_channel,
-        )
-
         self.channel_scanning_job = ChannelScanningJob(
             discord_client=self.discord_client,
-            processing_lock=self._processing_lock,
             database_channel=self.database_channel,
         )
 
         # Message Processor (depends on jobs)
         self.message_processor = MessageProcessor(
-            member_activity_job=self.member_activity_job,
             database_channel=self.database_channel,
             channel_scanning_job=self.channel_scanning_job,
         )
@@ -143,9 +122,7 @@ class Bot:
             await asyncio.sleep(5 * 60) # five minutes
 
             async with self._processing_lock:
-                await self.channel_scanning_job.run_scanning_sweep()
-                await self.member_activity_job.run_inactivity_sweep()
-                await self.channel_pruning_job.run_pruning_sweep()
+                await self.channel_scanning_job.scan_for_missed_messages()
 
     # -------------------------
     # Run

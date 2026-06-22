@@ -24,9 +24,8 @@ from jobs.channel_scanning_job import ChannelScanningJob
 
 
 class Bot:
-    def __init__(self, is_dry_run, config_channel_id):
+    def __init__(self, is_dry_run):
         self._is_dry_run = is_dry_run
-        self._config_channel_id = config_channel_id
 
         self.discord_client = discord.Client(
             intents=self._build_intents()
@@ -38,7 +37,6 @@ class Bot:
         self.dry_run = None
 
         # Channels
-        self.config_channel = None
         self.database_channel = None
         self.log_channel = None
 
@@ -63,7 +61,6 @@ class Bot:
         return intents
 
     def _register_events(self):
-
         @self.discord_client.event
         async def on_ready():
             await self._on_ready()
@@ -93,16 +90,8 @@ class Bot:
     async def _setup_services(self):
         self.dry_run = DryRun(is_dry_run=self._is_dry_run)
 
-        self.config_channel = ConfigChannel(
-            bot=self,
-            config_channel_id=self._config_channel_id,
-        )
-
+        # TODO: config channel no longer exists. Just hardcode prod config.
         config = await self.config_channel.get_config()
-
-        self._build_config_dependent_services(config)
-
-    def _build_config_dependent_services(self, config):
 
         # Channels
         self.database_channel = DatabaseChannel(
@@ -159,15 +148,6 @@ class Bot:
                 await self.channel_pruning_job.run_pruning_sweep()
 
     # -------------------------
-    # Hot Reload
-    # -------------------------
-
-    async def request_hot_reload(self):
-        async with self._processing_lock:
-            config = await self.config_channel.get_config()
-            self._build_config_dependent_services(config)
-
-    # -------------------------
     # Run
     # -------------------------
 
@@ -177,10 +157,9 @@ class Bot:
 
 def main():
     is_dry_run = None
-    config_channel_id = None
     token = None
 
-    bot = Bot(is_dry_run, config_channel_id)
+    bot = Bot(is_dry_run)
     # bot.run(token)
 
 

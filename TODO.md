@@ -1,15 +1,52 @@
 ## 🏗️ Implement: Scan all channels (& threads)
-- Scan all channels specified in config on startup and periodically (for missed events)
-- Need existing cursor per room, if it exists 
-- Add pending changes to MemberActivity and ChannelScanningCursor records
-- Commit changes when done 
-- Stub DB as needed
+ScanChannelsJob.scanAllChannels()
+- (memberActivityRecords, channelScanningCursors) = (self.scanChannel(channelId) for scanChannelConfig in config).flatten()
+- database.queueUpdate(r) for r in memberActivityRecords
+- database.queueUpdate(c) for c in channelScanningCursors
+- database.commitUpdates()
 
-## 🏗️ Implement: Database
-- In memory snapshot of member activity and cursors
-- Initialize from DB channel
-- Queue pending changes to DB in queue
-- Commit: Lock DB, write pending changes to channel and in memory DB, unlock DB
+ScanChannelsJob.scanChannel(channelId)
+- cursor = database.getChannelScanningCursor()
+- memberMessages = self.scanFromCursor(cursor)
+- updatedCursor = Cursor(memberMessages.last())
+- return (memberActivityRecords, cursor)
+
+ScanChannelsJob.scanChannelFromCursor(cursor)
+- client.scanUntilEnd(cursor.lastMessageId)
+- return messagesScanned
+
+Bot.run()
+- discord.login()
+
+Bot.onReady()
+- database.load()
+- scanChannelsJob.scanAllChannels()
+- Launch Task: self.periodicUpdate()
+
+Bot.periodicUpdate()
+  - scanChannelsJob.scanAllChannels()
+  - Launch Task: self.periodicUpdate()
+
+Database.load()
+- self.lock()
+- dbMessages = discordClient.readAllMessages(#bot-database)
+- self.instantiate(dbMessages)
+- self.unlock()
+
+Database.instantiate(discordMessages)
+
+Database.getChannelScanningCursor(channelId): ChannelScanningCursor?
+
+Database.getMemberActivity(memberId)
+
+Database.queueUpdate(ChannelScanningCursor | MemberActivity)
+
+Database.commitUpdates()
+- self.lock()
+- update/create messages in channel
+- update/create records in memory
+- self.unlock()
+
 
 ## 🏗️ Implement: Scan channel on message event
 

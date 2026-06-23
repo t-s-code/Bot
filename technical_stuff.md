@@ -64,8 +64,8 @@ Tracks how far our bot has scanned a channel for new messages.
 ```yaml
 CHANNEL_SCANNING_CURSOR
 channel_id: <discord_channel_id>
-last_read_message_id: <discord_message_id>
-last_read_message_timestamp: <ISO_UTC_timestamp>
+last_scanned_message_id: <discord_message_id>
+last_scanned_message_timestamp: <ISO_UTC_timestamp>
 ```
 
 #### CHANNEL_PRUNING_CURSOR

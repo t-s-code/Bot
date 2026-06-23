@@ -42,8 +42,12 @@ bot/
 
 ### Records in our `#bot-database` channel
 
-These records store the bot’s memory and progress so it can safely restart. Without this database, the bot would lose _essential_ activity history when messages are pruned or deleted.
+These records store the bot’s memory and progress so it can safely restart. This database enables our bot to:
 
+- know a member is still active even if all their messages have been deleted
+- 
+- restart without having to rescan everything from all channels
+  
 #### MEMBER_ACTIVITY_RECORD
 Tracks when a member posted last.
 

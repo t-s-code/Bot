@@ -12,6 +12,9 @@ Marks members as inactive when they haven't posted in a while, and marks inactiv
 
 > _The internet is never fully safe. However limiting our rooms to only people who are participating helps our rooms feel a little easier to connect in._
 
+Does not have permisisons to see _what_ we write.
+
+> _Our bot does everything without knowing a single word we share with each other. Discord never sends the content of our messages to our bot. Our bot only knows who posted and when._
 
 ## Technical Stuff
 

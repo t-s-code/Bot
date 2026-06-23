@@ -71,8 +71,8 @@ Tracks how far our bot has gotten in deleting messages in a channel.
 ```yaml
 CHANNEL_PRUNING_CURSOR
 channel_id: <discord_channel_id>
+last_checked_message_at: <ISO_UTC_timestamp>
 last_checked_message_id: <discord_message_id>
-last_checked_at: <ISO_UTC_timestamp>
 ```
 
 ### Timestamps

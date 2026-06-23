@@ -54,8 +54,8 @@ Tracks when a member posted last.
 MEMBER_ACTIVITY_RECORD
 user_id: <discord_user_id>
 status: active | inactive
-last_seen_message_at: <ISO_UTC_timestamp>
 last_seen_message_id: <discord_message_id>
+last_seen_message_timestamp: <ISO_UTC_timestamp>
 ```
 
 #### CHANNEL_SCANNING_CURSOR
@@ -64,8 +64,8 @@ Tracks how far our bot has scanned a channel for new messages.
 ```yaml
 CHANNEL_SCANNING_CURSOR
 channel_id: <discord_channel_id>
-last_read_message_at: <ISO_UTC_timestamp>
 last_read_message_id: <discord_message_id>
+last_read_message_timestamp: <ISO_UTC_timestamp>
 ```
 
 #### CHANNEL_PRUNING_CURSOR
@@ -74,8 +74,7 @@ Tracks how far our bot has gotten in deleting messages in a channel.
 ```yaml
 CHANNEL_PRUNING_CURSOR
 channel_id: <discord_channel_id>
-last_checked_message_at: <ISO_UTC_timestamp>
-last_checked_message_id: <discord_message_id>
+last_deleted_message_timestamp: <ISO_UTC_timestamp>
 ```
 
 ### Timestamps

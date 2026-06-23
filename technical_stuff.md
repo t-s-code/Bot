@@ -18,7 +18,7 @@ last_seen_message_timestamp: <ISO_UTC_timestamp>
 ```
 
 ### CHANNEL_SCANNING_CURSOR
-Tracks how far our bot has scanned a channel for new messages.
+Tracks how far our bot has scanned in a channel for new messages.
 
 ```yaml
 CHANNEL_SCANNING_CURSOR

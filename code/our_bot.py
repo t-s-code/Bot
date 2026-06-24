@@ -10,6 +10,8 @@ class OurBot:
         self._is_dry_run = is_dry_run
         self._config = config
 
+        self._config.validate()
+
         self._discord_client = discord.Client(
             intents=self._build_intents()
         )

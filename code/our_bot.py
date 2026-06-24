@@ -1,15 +1,12 @@
 class OurBot:
-    def __init__(self, is_dry_run):
+    def __init__(self, is_dry_run, config):
         self._is_dry_run = is_dry_run
+        self._config = config
 
         self._discord_client = discord.Client(
             intents=self._build_intents()
         )
 
-        # TODO: when to use?
-        self._processing_lock = asyncio.Lock()
-
-        # Jobs
         self._channel_scanning_job = ChannelScanningJob(
             discord_client=self._discord_client,
         )
@@ -23,7 +20,6 @@ class OurBot:
     def _build_intents(self):
         intents = discord.Intents.default()
         intents.message_content = False
-        intents.members = False
         return intents
 
     def _register_events(self):
@@ -42,12 +38,10 @@ class OurBot:
     async def _on_ready(self):
         print(f"Logged in as {self._discord_client.user}")
 
-        await self._setup_services()
-
         asyncio.create_task(self.run_periodic_jobs())
 
     async def _on_message(self, message):
-        await self.message_processor.process_message(message)
+        pass
 
     # -------------------------
     # Periodic Jobs
@@ -56,9 +50,7 @@ class OurBot:
     async def run_periodic_jobs(self):
         while True:
             await asyncio.sleep(5 * 60) # five minutes
-
-            async with self._processing_lock:
-                await self._channel_scanning_job.scan_for_missed_messages()
+            await self._channel_scanning_job.scan_channels()
 
     # -------------------------
     # Run

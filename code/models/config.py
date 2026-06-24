@@ -37,3 +37,4 @@ bot_config = BotConfig(
         )
     ]
 )
+bot_config.validate()

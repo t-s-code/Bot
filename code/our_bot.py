@@ -1,3 +1,10 @@
+# our_bot.py
+
+import asyncio
+import discord
+
+from jobs.channel_scanning_job import ChannelScanningJob
+
 class OurBot:
     def __init__(self, is_dry_run, config):
         self._is_dry_run = is_dry_run

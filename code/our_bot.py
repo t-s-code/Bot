@@ -8,7 +8,7 @@ class OurBot:
         )
 
         self._channel_scanning_job = ChannelScanningJob(
-            discord_client=self._discord_client,
+            discord_client=self._discord_client
         )
 
         self._register_events()

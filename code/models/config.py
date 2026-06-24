@@ -6,11 +6,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Config:
-    channel_pruning_policies: list[ChannelPruningPolicy]
+    channel_pruning_configs: list[ChannelPruningConfig]
 
 
 @dataclass(frozen=True)
-class ChannelPruningPolicy:
+class ChannelPruningConfig:
     channel_name: str
     channel_id: int
-    delete_older_than_days: int
+    days_until_delete_messages: int

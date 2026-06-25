@@ -3,7 +3,7 @@
 import asyncio
 import discord
 
-from jobs.channel_scanning_job import ChannelScanningJob
+from jobs import ChannelScanningJob
 
 class OurBot:
     def __init__(self, is_dry_run, config):

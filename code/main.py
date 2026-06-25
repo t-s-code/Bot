@@ -1,11 +1,11 @@
 # main.py
 
 from our_bot import OurBot
-from models.config import *
+from models.config import BotConfig, ChannelPruningConfig
 
 def main():
     is_dry_run = True
-    token = None
+    token = "not set"
 
     config = BotConfig(
         channel_pruning_configs = [
@@ -17,7 +17,7 @@ def main():
         ]
     )
 
-    bot = Bot(is_dry_run, config)
+    bot = OurBot(is_dry_run, config)
     bot.run(token)
 
 

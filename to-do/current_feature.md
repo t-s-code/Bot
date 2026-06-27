@@ -1,30 +1,3 @@
 ## 🏗️ Implement: Scan all channels (& threads)
 
-ScanChannelsJob.scanAllChannels()
-- (memberActivityRecords, channelScanningCursors) = (self.scanChannel(channelId) for scanChannelConfig in config).flatten()
-- database.queueUpdate(r) for r in memberActivityRecords
-- database.queueUpdate(c) for c in channelScanningCursors
-- database.commitUpdates()
-
-ScanChannelsJob.scanChannel(channelId)
-- cursor = database.getChannelScanningCursor()
-- memberMessages = self.scanFromCursor(cursor)
-- updatedCursor = Cursor(memberMessages.last())
-- return (memberActivityRecords, cursor)
-
-ScanChannelsJob.scanChannelFromCursor(cursor)
-- client.scanUntilEnd(cursor.lastMessageId)
-- return messagesScanned
-
-Bot.run()
-- discord.login()
-
-Bot.onReady()
-- database.load()
-- scanChannelsJob.scanAllChannels()
-- Launch Task: self.periodicUpdate()
-
-Bot.periodicUpdate()
-  - scanChannelsJob.scanAllChannels()
-  - Launch Task: self.periodicUpdate()
-
+TODO, what's next :)?

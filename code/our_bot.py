@@ -3,6 +3,7 @@
 import asyncio
 import discord
 
+from core.database import Database
 from jobs import ChannelScanningJob
 
 class OurBot:
@@ -16,8 +17,12 @@ class OurBot:
             intents=self._build_intents()
         )
 
+        self._database = Database(self._discord_client)
+
         self._channel_scanning_job = ChannelScanningJob(
-            discord_client=self._discord_client
+            discord_client=self._discord_client,
+            database=self._database,
+            config=self._config
         )
 
         self._register_events()
@@ -47,19 +52,11 @@ class OurBot:
     async def _on_ready(self):
         print(f"Logged in as {self._discord_client.user}")
 
-        asyncio.create_task(self.run_periodic_jobs())
+        await self._database.load()
+        asyncio.create_task(self._channel_scanning_job.run())
 
     async def _on_message(self, message):
         pass
-
-    # -------------------------
-    # Periodic Jobs
-    # -------------------------
-
-    async def run_periodic_jobs(self):
-        while True:
-            await asyncio.sleep(5 * 60) # five minutes
-            await self._channel_scanning_job.scan_channels()
 
     # -------------------------
     # Run
@@ -67,4 +64,3 @@ class OurBot:
 
     def run(self, token):
         self._discord_client.run(token)
-      

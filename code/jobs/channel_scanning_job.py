@@ -10,6 +10,7 @@ class ChannelScanningJob:
         self._config = config
 
     async def run(self):
+        print("Scan Job started")
         while True:
             await self.scan_all_channels()
             await asyncio.sleep(self._config.channel_scanning_config.minutes_between_scans * 60)

@@ -12,6 +12,7 @@ class Database:
     async def load(self):
         async with self._lock:
             # TODO: messages_from_db = load all messages from the #bot-database channel
+            messages_from_db = []
             self._in_memory_database = InMemoryDatabase(messages_from_db)
 
     async def get_channel_scanning_cursor(self, channel_id):

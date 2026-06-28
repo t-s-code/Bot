@@ -1,11 +1,15 @@
 # main.py
 
+import os, sys
 from our_bot import OurBot
 from models.config import BotConfig, ChannelPruningConfig, ChannelScanningConfig
 
 def main():
     is_dry_run = True
-    token = "not set"
+    discord_api_token = os.environ.get("DISCORD_API_TOKEN", None)
+    if discord_api_token is None:
+        raise ValueError("DISCORD_API_TOKEN environment variable must be set.")
+
 
     config = BotConfig(
         server_id = -1,
@@ -22,7 +26,7 @@ def main():
     )
 
     bot = OurBot(is_dry_run, config)
-    bot.run(token)
+    bot.run(discord_api_token)
 
 
 if __name__ == "__main__":

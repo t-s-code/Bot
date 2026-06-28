@@ -45,12 +45,23 @@ class OurBot:
         async def on_message(message):
             await self._on_message(message)
 
+        @self._discord_client.event
+        async def on_error(event, *args, **kwargs):
+            import sys, traceback
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            print(f"\nUnhandled error! Exiting...\n{exc_type.__name__}: {exc_value}", file=sys.stderr)
+            traceback.print_tb(exc_traceback, file=sys.stderr)
+            print("", file=sys.stderr)
+            await self._discord_client.close()
+
+
     # -------------------------
     # Event Handlers
     # -------------------------
   
     async def _on_ready(self):
-        print(f"Logged in as {self._discord_client.user}")
+        bot_user = self._discord_client.user
+        print(f"Logged in as {bot_user.display_name} ({bot_user.id})")
 
         await self._database.load()
         asyncio.create_task(self._channel_scanning_job.run())

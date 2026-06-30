@@ -34,6 +34,7 @@ class OurBot:
     def _build_intents(self):
         intents = discord.Intents.default()
         intents.message_content = False
+        intents.members = True
         return intents
 
     def _register_events(self):
@@ -64,7 +65,9 @@ class OurBot:
         print(f"Logged in as {bot_user.display_name} ({bot_user.id})")
 
         await self._database.load()
-        asyncio.create_task(self._channel_scanning_job.run())
+        channel_scanning_task = asyncio.create_task(self._channel_scanning_job.run())
+
+        await channel_scanning_task
 
     async def _on_message(self, message):
         pass

@@ -7,7 +7,7 @@ class InMemoryDatabase:
 
     def get_channel_scanning_cursor(self, channel_id):
         # TODO
-        pass
+        return None
 
     def get_member_activity(self, user_id):
         # TODO

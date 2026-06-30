@@ -18,8 +18,8 @@ def main():
         ),
         channel_pruning_configs = [
             ChannelPruningConfig(
-                channel_name="",
-                channel_id=1,
+                channel_name="Rules",
+                channel_id=1356995099598389338,
                 days_until_delete_messages_from_channel=3,
             )
         ]

@@ -3,7 +3,8 @@
 import asyncio
 import discord
 
-from jobs.channel_scanning_job import ChannelScanningJob
+from core.database import Database
+from jobs import ChannelScanningJob
 
 class OurBot:
     def __init__(self, is_dry_run, config):
@@ -16,8 +17,12 @@ class OurBot:
             intents=self._build_intents()
         )
 
+        self._database = Database(self._discord_client)
+
         self._channel_scanning_job = ChannelScanningJob(
-            discord_client=self._discord_client
+            discord_client=self._discord_client,
+            database=self._database,
+            config=self._config
         )
 
         self._register_events()
@@ -29,6 +34,7 @@ class OurBot:
     def _build_intents(self):
         intents = discord.Intents.default()
         intents.message_content = False
+        intents.members = True
         return intents
 
     def _register_events(self):
@@ -40,26 +46,31 @@ class OurBot:
         async def on_message(message):
             await self._on_message(message)
 
+        @self._discord_client.event
+        async def on_error(event, *args, **kwargs):
+            import sys, traceback
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            print(f"\nUnhandled error! Exiting...\n{exc_type.__name__}: {exc_value}", file=sys.stderr)
+            traceback.print_tb(exc_traceback, file=sys.stderr)
+            print("", file=sys.stderr)
+            await self._discord_client.close()
+
+
     # -------------------------
     # Event Handlers
     # -------------------------
   
     async def _on_ready(self):
-        print(f"Logged in as {self._discord_client.user}")
+        bot_user = self._discord_client.user
+        print(f"Logged in as {bot_user.display_name} ({bot_user.id})")
 
-        asyncio.create_task(self.run_periodic_jobs())
+        await self._database.load()
+        channel_scanning_task = asyncio.create_task(self._channel_scanning_job.run())
+
+        await channel_scanning_task
 
     async def _on_message(self, message):
         pass
-
-    # -------------------------
-    # Periodic Jobs
-    # -------------------------
-
-    async def run_periodic_jobs(self):
-        while True:
-            await asyncio.sleep(5 * 60) # five minutes
-            await self._channel_scanning_job.scan_channels()
 
     # -------------------------
     # Run
@@ -67,4 +78,3 @@ class OurBot:
 
     def run(self, token):
         self._discord_client.run(token)
-      
